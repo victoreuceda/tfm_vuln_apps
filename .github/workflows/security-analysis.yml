@@ -5,32 +5,20 @@ on:
     branches:
       - main
 
-jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-  sonarQubeAnalysis:
-    needs: setup
-    runs-on: ubuntu-latest
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: self-hosted
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: Bypass Ngrok warning
-        run: |
-          curl -H "ngrok-skip-browser-warning: true" ${{ secrets.SONAR_HOST_URL }}
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
+      - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          
       # If you wish to fail your job when the Quality Gate is red, uncomment the
       # following lines. This would typically be used to fail a deployment.
       # - uses: sonarsource/sonarqube-quality-gate-action@master

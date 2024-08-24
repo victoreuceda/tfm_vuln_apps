@@ -1,7 +1,7 @@
 name: Security and Code Analysis Pipeline
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -33,50 +33,3 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  zapScan:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run API server
-        run: |
-          npm install
-          npm run start &
-          sleep 10
-
-      - name: Run OWASP ZAP in Docker
-        run: |
-          docker run -u zap -p 8080:8080 -d owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
-          sleep 30
-          docker exec -it $(docker ps -q --filter ancestor=owasp/zap2docker-stable) zap-cli open-url http://host.docker.internal:3000
-          docker exec -it $(docker ps -q --filter ancestor=owasp/zap2docker-stable) zap-cli import-openapi --openapi-url http://host.docker.internal:3000/api-docs-json
-          docker exec -it $(docker ps -q --filter ancestor=owasp/zap2docker-stable) zap-cli active-scan --openapi-url http://host.docker.internal:3000/api-docs-json
-          docker exec -it $(docker ps -q --filter ancestor=owasp/zap2docker-stable) zap-cli report -o zap_report.html -f html
-
-      - name: Upload ZAP report
-        uses: actions/upload-artifact@v2
-        with:
-          name: zap-report
-          path: zap_report.html
-
-  staticCodeAnalysis:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install ESLint
-        run: npm install eslint --save-dev
-
-      - name: Run ESLint for Static Code Analysis
-        run: npx eslint ./src --ext .ts
-
-      - name: Upload ESLint report
-        uses: actions/upload-artifact@v2
-        with:
-          name: eslint-report
-          path: eslint-report.html

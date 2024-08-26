@@ -24,7 +24,8 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         image: tfm/app
-        args: --file=Dockerfile --sarif-file-output=snyk.sarif
+        args: --file=Dockerfile
+        sarif: snyk.sarif
     
     - name: Upload result to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3

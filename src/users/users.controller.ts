@@ -9,6 +9,7 @@ export class UsersController {
 
     @Post()
     create(@Body() user: UserDto) {
+        console.log('Creating user endpoint:', user);
         // Create sample user with uuid as id
         this.users.push({
             id: uuidv4(),

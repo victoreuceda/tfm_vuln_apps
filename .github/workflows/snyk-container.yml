@@ -10,27 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Build a Docker image
-      run: docker build -t your/image-to-test .
-    - name: Run Snyk to check Docker image for vulnerabilities
-      # Snyk can be used to break the build when it detects vulnerabilities.
-      # In this case we want to upload the issues to GitHub Code Scanning
-      continue-on-error: true
-      uses: snyk/actions/docker@master
+      
       env:
-        # In order to use the Snyk Action you will need to have a Snyk API token.
-        # See https://docs.snyk.io/integrations/ci-cd-integrations/github-actions-integration#getting-your-snyk-token
-        # or you can sign up for free at https://snyk.io/login
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        image: your/image-to-test
-        args: --file=Dockerfile
+
+    # Build the docker image for testing
+    - name: Build a Docker image
+      run: docker build -t tfm/app .
     
-    - name: Replace security-severity undefined for license-related findings
-      run: |
-        sed -i 's/"security-severity": "undefined"/"security-severity": "0"/g' snyk.sarif
+    # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
+    - name: Snyk Container monitor
+      run: snyk container monitor tfm/app --file=Dockerfile
     
+    # Push the Snyk Code results into GitHub Code Scanning tab
     - name: Upload result to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: snyk.sarif
+        sarif_file: snyk-code.sarif

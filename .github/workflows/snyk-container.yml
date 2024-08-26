@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build a Docker image
-      run: docker build -t your/image-to-test .
+      run: docker build -t tfm/app .
     - name: Run Snyk to check Docker image for vulnerabilities
       # Snyk can be used to break the build when it detects vulnerabilities.
       # In this case we want to upload the issues to GitHub Code Scanning
@@ -23,12 +23,14 @@ jobs:
         # or you can sign up for free at https://snyk.io/login
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        image: your/image-to-test
+        image: tfm/app
         args: --file=Dockerfile
-    
-    - name: Replace security-severity undefined for license-related findings
+        sarif: true
+
+    - name: Replace security-severity with 0
       run: |
         sed -i 's/"security-severity": "undefined"/"security-severity": "0"/g' snyk.sarif
+        sed -i 's/"security-severity": "null"/"security-severity": "0"/g' snyk.sarif
     
     - name: Upload result to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3

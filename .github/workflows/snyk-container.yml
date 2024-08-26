@@ -1,9 +1,7 @@
 name: Snyk Container
 on:
-  push:
-    branches: ["main"]
   pull_request:
-    branches: ["main", "qa", "dev"]
+    branches: ["main", "qa"]
 
 jobs:
   snyk:

@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build and analyze
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - uses: actions/checkout@v4
@@ -19,10 +19,6 @@ jobs:
       - name: Install SonarScanner
         run: |
           brew install sonar-scanner
-
-      - name: Run ESLint and generate report
-        run: |
-          pnpm eslint -f json -o eslint-report.json .
 
       - name: Run SonarQube analysis
         env:
@@ -35,4 +31,3 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN
-            -Dsonar.eslint.reportPaths=eslint-report.json

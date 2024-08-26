@@ -20,6 +20,10 @@ jobs:
         run: |
           brew install sonar-scanner
 
+      - name: Run ESLint and generate report
+        run: |
+          pnpm eslint -f json -o eslint-report.json .
+
       - name: Run SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -31,3 +35,4 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.eslint.reportPaths=eslint-report.json

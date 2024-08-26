@@ -1,11 +1,11 @@
-name: Security and Code Analysis Pipeline
+name: SonarQube Scan
 
 on:
+  push:
+    branches: ["main"]
   pull_request:
-    branches:
-      - main
-      - dev
-      - qa
+    branches: ["main", "qa", "dev"]
+
 
 jobs:
   build:
@@ -17,17 +17,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run SonarQube analysis using Docker
+      - name: Install SonarScanner
+        run: |
+          brew install sonar-scanner
+
+      - name: Run SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         run: |
-          docker run --rm \
-            -e SONAR_HOST_URL=$SONAR_HOST_URL \
-            -e SONAR_LOGIN=$SONAR_TOKEN \
-            -v $(pwd):/usr/src \
-            sonarsource/sonar-scanner-cli \
+          sonar-scanner \
             -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-            -Dsonar.sources=.
-            -Dsonar.report.export.path=sonar-report.json
+            -Dsonar.sources=. \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_TOKEN

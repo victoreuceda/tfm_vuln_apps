@@ -22,7 +22,7 @@ jobs:
 
       - name: Run ESLint and generate report
         run: |
-          pnpm eslint -f json -o eslint-report.json .
+          npx eslint -f json -o eslint-report.json .
 
       - name: Run SonarQube analysis
         env:

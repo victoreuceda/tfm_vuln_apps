@@ -6,24 +6,12 @@ on:
     branches: ["main", "qa", "dev"]
 
 jobs:
-  snyk:
+  security:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      
+    - name: Run Snyk to check Docker image for vulnerabilities
+      uses: snyk/actions/docker@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-    # Build the docker image for testing
-    - name: Build a Docker image
-      run: docker build -t tfm/app .
-    
-    # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
-    - name: Snyk Container monitor
-      run: snyk container monitor tfm/app --file=Dockerfile
-    
-    # Push the Snyk Code results into GitHub Code Scanning tab
-    - name: Upload result to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: snyk-code.sarif
+        image: tfm/app

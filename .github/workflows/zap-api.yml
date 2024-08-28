@@ -1,0 +1,26 @@
+name: ZAP API Scan
+
+on:
+  pull_request:
+    branches: [ "main", "qa", "dev" ]
+
+jobs:
+    zap_scan:
+        runs-on: self-hosted
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build a Docker image
+              run: docker build -t tfm/app .
+            - name: Initialize API container
+              run: docker run -d --name tfm/app -p 3000:300 tfm/app
+
+            - name: Wait for API to start
+              run: sleep 30
+
+            - name: Run ZAP API scan
+              uses: zaproxy/action-api-scan@v0.7.0
+              with:
+                token: ${{ secrets.GITHUB_TOKEN }}
+                format: openapi
+                target: 'http://localhost:3000'
+                cmd_options: '-a'

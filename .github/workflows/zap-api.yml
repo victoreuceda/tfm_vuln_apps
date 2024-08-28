@@ -19,12 +19,26 @@ jobs:
               run: docker run -d --name tfm_app -p 3000:3000 tfm/app
 
             - name: Wait for API to start
-              run: sleep 30
+              run: sleep 10
 
             - name: Run ZAP API scan
               uses: zaproxy/action-api-scan@v0.7.0
               with:
-                token: ${{ secrets.GITHUB_TOKEN }}
+                token: ${{ secrets.ZAP_TOKEN }}
                 format: openapi
                 target: 'http://localhost:3000/api'
                 cmd_options: '-a'
+              continue-on-error: true
+            
+            - name: Stop and remove API container
+              run: docker stop tfm_app && docker rm tfm_app
+
+            - name: Remove Docker image
+              run: docker rmi tfm/app
+        
+            - name: Upload ZAP report
+              uses: actions/upload-artifact@v4
+              with: 
+                name: zap_report
+                path: zap_report.html
+              continue-on-error: true

@@ -12,7 +12,7 @@ jobs:
             - name: Build a Docker image
               run: docker build -t tfm/app .
             - name: Initialize API container
-              run: docker run -d --name tfm/app -p 3000:300 tfm/app
+              run: docker run -d --name tfm_app -p 3000:3000 tfm/app
 
             - name: Wait for API to start
               run: sleep 30

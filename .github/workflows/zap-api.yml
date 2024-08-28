@@ -29,7 +29,15 @@ jobs:
                 target: 'http://${{ env.HOST }}:${{ env.PORT }}/api'
                 cmd_options: '-a'
               continue-on-error: true
-            
+
+            - name: Scan the web application
+              uses: zaproxy/action-full-scan@v0.10.0
+              with:
+                token: ${{ secrets.ZAP_TOKEN }}
+                target: 'http://${{ env.HOST }}:${{ env.PORT }}'
+                cmd_options: '-a'
+              continue-on-error: true
+
             - name: Stop and remove API container
               run: docker stop tfm_app && docker rm tfm_app
 

@@ -7,6 +7,10 @@ on:
 jobs:
     zap_scan:
         runs-on: self-hosted
+        permissions:
+            contents: write
+            pull-requests: write
+            repository-projects: write
         steps:
             - uses: actions/checkout@v4
             - name: Build a Docker image

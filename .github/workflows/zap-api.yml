@@ -1,0 +1,45 @@
+name: ZAP API Scan
+
+on:
+  pull_request:
+    branches: [ "main", "qa", "dev" ]
+
+jobs:
+    zap_scan:
+        runs-on: self-hosted
+        env:
+            ZAP_TOKEN: ${{ secrets.ZAP_TOKEN }}
+            PORT: 3000
+            HOST: localhost
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build a Docker image
+              run: docker build -t tfm/app .
+            - name: Initialize API container
+              run: docker run -d --name tfm_app -p ${{ env.PORT }}:${{ env.PORT }} tfm/app
+
+            - name: Wait for API to start
+              run: sleep 10
+
+            - name: Run ZAP API scan
+              uses: zaproxy/action-api-scan@v0.7.0
+              with:
+                token: ${{ env.ZAP_TOKEN }}
+                format: openapi
+                target: 'http://${{ env.HOST }}:${{ env.PORT }}/api'
+                cmd_options: '-a'
+              continue-on-error: true
+
+            - name: Scan the web application
+              uses: zaproxy/action-full-scan@v0.10.0
+              with:
+                token: ${{ secrets.ZAP_TOKEN }}
+                target: 'http://${{ env.HOST }}:${{ env.PORT }}'
+                cmd_options: '-a'
+              continue-on-error: true
+
+            - name: Stop and remove API container
+              run: docker stop tfm_app && docker rm tfm_app
+
+            - name: Remove Docker image
+              run: docker rmi tfm/app

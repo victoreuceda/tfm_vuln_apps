@@ -6,7 +6,7 @@ on:
 
 jobs:
     zap_scan:
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
         env:
             ZAP_TOKEN: ${{ secrets.ZAP_TOKEN }}
             PORT: 3000
